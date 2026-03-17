@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAYN — Instagram Follower Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;0,9..40,900;1,9..40,300&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #020610;
+      --bg2: #07111F;
+      --bg3: #0D1A30;
+      --ac: #0B84C8;
+      --ac2: #1EA0E8;
+      --ac3: #5DC0FF;
+      --ac4: #06C8E8;
+      --tx1: #D8EAFF;
+      --tx2: #7EB0D8;
+      --tx3: #2E4A70;
+      --grn: #0FA872;
+      --red: #E83055;
+      --pur: #7040E8;
+      --amb: #E89010;
+      --gold: #D4A017;
+      --ff: 'DM Sans', sans-serif;
+      --fm: 'Space Mono', monospace;
+      --fd: 'Bebas Neue', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--ff);
+      background: var(--bg);
+      color: var(--tx1);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── GRID BG ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(11,132,200,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11,132,200,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 60px;
+      background: rgba(2,6,16,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(11,132,200,.1);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .nav-logo-icon {
+      width: 36px; height: 36px; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 0 20px rgba(11,132,200,.5);
+    }
+    .nav-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .nav-brand {
+      font-family: var(--fd);
+      font-size: 28px;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, #5DC0FF, #1EA0E8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links {
+      display: flex; align-items: center; gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--tx2);
+      text-decoration: none; letter-spacing: .5px;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--ac3); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--ac), #0A6CA8);
+      color: white !important;
+      padding: 9px 22px;
+      border-radius: 8px;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 20px rgba(11,132,200,.4);
+      transition: all .2s !important;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(11,132,200,.6) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 120px 20px 80px;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 800px; height: 800px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(11,132,200,.12) 0%, transparent 65%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(94,192,255,.06) 0%, transparent 60%);
+      top: 30%; left: 60%; transform: translate(-50%,-50%);
+      pointer-events: none;
+      animation: float 8s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-55%) scale(1.05)} }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(11,132,200,.12); border: 1px solid rgba(11,132,200,.3);
+      border-radius: 100px; padding: 7px 16px;
+      font-size: 11px; font-family: var(--fm); color: var(--ac3);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeUp 1s ease both;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--grn);
+      box-shadow: 0 0 8px rgba(15,168,114,.8);
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .hero-title {
+      font-family: var(--fd);
+      font-size: clamp(72px, 10vw, 140px);
+      letter-spacing: 8px;
+      line-height: .9;
+      background: linear-gradient(135deg, #ffffff 0%, #5DC0FF 50%, #1EA0E8 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+      animation: fadeUp 1s .1s ease both;
+    }
+    .hero-subtitle-line {
+      font-family: var(--fd);
+      font-size: clamp(18px, 3vw, 36px);
+      letter-spacing: 6px;
+      color: var(--ac2);
+      margin-bottom: 28px;
+      animation: fadeUp 1s .2s ease both;
+    }
+    .hero-desc {
+      max-width: 540px;
+      font-size: 16px; line-height: 1.7; color: var(--tx2);
+      margin-bottom: 48px;
+      animation: fadeUp 1s .3s ease both;
+    }
+    .hero-desc strong { color: var(--tx1); }
+
+    .hero-btns {
+      display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 1s .4s ease both;
+    }
+    .btn-hero-primary {
+      display: flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--ac), #0A6CA8);
+      color: white; text-decoration: none;
+      padding: 16px 36px; border-radius: 12px;
+      font-size: 15px; font-weight: 700; letter-spacing: .5px;
+      box-shadow: 0 6px 30px rgba(11,132,200,.5);
+      transition: all .25s;
+    }
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(11,132,200,.7); }
+    .btn-hero-secondary {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(11,132,200,.08); border: 1px solid rgba(11,132,200,.25);
+      color: var(--tx1); text-decoration: none;
+      padding: 16px 36px; border-radius: 12px;
+      font-size: 15px; font-weight: 600;
+      transition: all .25s;
+    }
+    .btn-hero-secondary:hover { background: rgba(11,132,200,.15); border-color: rgba(11,132,200,.5); }
+
+    .hero-stats-row {
+      display: flex; gap: 40px; margin-top: 60px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 1s .5s ease both;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat-n {
+      font-family: var(--fm);
+      font-size: 28px; font-weight: 700;
+      color: var(--ac3);
+      display: block;
+    }
+    .hero-stat-l {
+      font-size: 11px; color: var(--tx3); letter-spacing: 2px; text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ── MOCK EXTENSION ── */
+    .extension-preview {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center;
+      padding: 20px 20px 80px;
+      animation: fadeUp 1s .6s ease both;
+    }
+    .ext-frame {
+      width: 340px;
+      background: var(--bg2);
+      border: 1px solid rgba(11,132,200,.2);
+      border-radius: 18px;
+      box-shadow:
+        0 0 0 1px rgba(11,132,200,.1),
+        0 30px 80px rgba(0,0,0,.8),
+        0 0 60px rgba(11,132,200,.1);
+      overflow: hidden;
+      position: relative;
+    }
+    .ext-frame::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #0B84C8, #5DC0FF, #06C8E8);
+    }
+    .ext-inner { padding: 18px; }
+    .ext-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .ext-logo {
+      width: 38px; height: 38px; border-radius: 11px; overflow: hidden;
+      box-shadow: 0 2px 14px rgba(11,132,200,.45);
+    }
+    .ext-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .ext-brand { font-family: var(--fd); font-size: 20px; letter-spacing: 2px; background: linear-gradient(135deg,#5DC0FF,#1EA0E8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height:1.1; }
+    .ext-sub { font-family: var(--fm); font-size: 7px; color: var(--tx3); letter-spacing: 2.5px; text-transform: uppercase; }
+    .ext-status {
+      background: var(--bg3); border: 1px solid rgba(11,132,200,.14); border-radius: 10px;
+      padding: 10px 13px; margin-bottom: 11px; position: relative; overflow: hidden;
+    }
+    .ext-status::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,#0B84C8,#5DC0FF,#06B0D8); }
+    .ext-status-lbl { font-family: var(--fm); font-size: 7.5px; color: var(--tx3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+    .ext-status-val { font-size: 11.5px; color: var(--tx2); display: flex; align-items: center; gap: 6px; }
+    .ext-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--grn); box-shadow: 0 0 6px rgba(15,168,114,.7); flex-shrink:0; animation: blink 2s ease infinite; }
+    .ext-stats-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; margin-bottom: 11px; }
+    .ext-stat-box { background: var(--bg3); border: 1px solid rgba(11,132,200,.1); border-radius: 8px; padding: 8px 3px; text-align: center; }
+    .ext-stat-n { font-family: var(--fm); font-size: 13px; font-weight: 700; color: var(--ac3); line-height: 1; margin-bottom: 3px; }
+    .ext-stat-l { font-size: 6px; color: var(--tx3); letter-spacing: .2px; line-height: 1.3; }
+    .ext-btn-main {
+      width: 100%; padding: 12px; border-radius: 10px; border: none; cursor: pointer;
+      background: linear-gradient(135deg,#0B84C8,#0A6CA8); color: white;
+      font-family: var(--ff); font-size: 13px; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(11,132,200,.4); margin-bottom: 7px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .ext-qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 11px; }
+    .ext-qa { padding: 8px 9px; border-radius: 8px; font-family: var(--ff); font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid; }
+    .qa-red { color: #E83055; border-color: rgba(232,48,85,.2); background: rgba(232,48,85,.06); }
+    .qa-grn { color: #0FA872; border-color: rgba(15,168,114,.2); background: rgba(15,168,114,.06); }
+    .qa-amb { color: #E89010; border-color: rgba(232,144,16,.2); background: rgba(232,144,16,.06); }
+    .qa-pur { color: #A060FF; border-color: rgba(112,64,232,.2); background: rgba(112,64,232,.06); }
+    .qa-gold { color: #D4A017; border-color: rgba(212,160,23,.2); background: rgba(212,160,23,.06); }
+    .ext-footer { display: flex; justify-content: space-between; padding-top: 9px; border-top: 1px solid rgba(11,132,200,.07); font-family: var(--fm); font-size: 8px; color: var(--tx3); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── SECTION COMMON ── */
+    section { position: relative; z-index: 1; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+    .section-tag {
+      display: inline-block;
+      font-family: var(--fm); font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--ac3); background: rgba(11,132,200,.1); border: 1px solid rgba(11,132,200,.2);
+      padding: 5px 14px; border-radius: 100px; margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--fd);
+      font-size: clamp(36px, 5vw, 64px);
+      letter-spacing: 4px;
+      line-height: 1;
+      color: var(--tx1);
+      margin-bottom: 16px;
+    }
+    .section-title span { color: var(--ac2); }
+    .section-desc {
+      font-size: 16px; line-height: 1.7; color: var(--tx2);
+      max-width: 560px;
+    }
+
+    /* ── FEATURES ── */
+    .features { padding: 100px 0; }
+    .features-header { text-align: center; margin-bottom: 64px; }
+    .features-header .section-desc { margin: 0 auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid rgba(11,132,200,.12);
+      border-radius: 16px; padding: 28px;
+      transition: all .3s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      opacity: 0; transition: opacity .3s;
+    }
+    .feature-card:hover { border-color: rgba(11,132,200,.3); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+    .feature-card:hover::before { opacity: 1; }
+    .feat-ac::before { background: linear-gradient(90deg, var(--ac), var(--ac3)); }
+    .feat-red::before { background: linear-gradient(90deg, var(--red), #FF6080); }
+    .feat-grn::before { background: linear-gradient(90deg, var(--grn), #30D890); }
+    .feat-pur::before { background: linear-gradient(90deg, var(--pur), #A060FF); }
+    .feat-amb::before { background: linear-gradient(90deg, var(--amb), #F0B040); }
+    .feat-gold::before { background: linear-gradient(90deg, var(--gold), #F0C848); }
+    .feat-icon {
+      width: 44px; height: 44px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .feat-icon svg { width: 22px; height: 22px; }
+    .feat-icon-ac { background: rgba(11,132,200,.15); color: var(--ac3); }
+    .feat-icon-red { background: rgba(232,48,85,.12); color: var(--red); }
+    .feat-icon-grn { background: rgba(15,168,114,.12); color: var(--grn); }
+    .feat-icon-pur { background: rgba(112,64,232,.12); color: #A060FF; }
+    .feat-icon-amb { background: rgba(232,144,16,.12); color: var(--amb); }
+    .feat-icon-gold { background: rgba(212,160,23,.12); color: var(--gold); }
+    .feat-name { font-family: var(--fm); font-size: 12px; font-weight: 700; color: var(--tx1); margin-bottom: 8px; letter-spacing: .5px; text-transform: uppercase; }
+    .feat-desc { font-size: 13.5px; line-height: 1.6; color: var(--tx2); }
+    .feat-badge {
+      display: inline-block; font-family: var(--fm); font-size: 8px; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-top: 12px;
+    }
+    .badge-free { background: rgba(15,168,114,.12); color: var(--grn); }
+    .badge-pro { background: rgba(212,160,23,.12); color: var(--gold); }
+
+    /* ── HOW IT WORKS ── */
+    .how { padding: 100px 0; background: var(--bg2); }
+    .how-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex; gap: 20px; position: relative; padding-bottom: 36px;
+    }
+    .step:last-child { padding-bottom: 0; }
+    .step-line {
+      position: absolute; left: 19px; top: 44px; bottom: 0; width: 2px;
+      background: linear-gradient(180deg, rgba(11,132,200,.3), transparent);
+    }
+    .step:last-child .step-line { display: none; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(11,132,200,.15); border: 1px solid rgba(11,132,200,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--fm); font-size: 13px; font-weight: 700; color: var(--ac3);
+      position: relative; z-index: 1;
+    }
+    .step-content {}
+    .step-title { font-family: var(--fm); font-size: 13px; font-weight: 700; color: var(--tx1); margin-bottom: 6px; letter-spacing: .5px; }
+    .step-desc { font-size: 13.5px; line-height: 1.6; color: var(--tx2); }
+    .step-code {
+      font-family: var(--fm); font-size: 11px; color: var(--ac3);
+      background: rgba(11,132,200,.08); border: 1px solid rgba(11,132,200,.15);
+      padding: 6px 12px; border-radius: 6px; margin-top: 8px; display: inline-block;
+    }
+
+    /* Phase viz */
+    .phases-viz {
+      background: var(--bg);
+      border: 1px solid rgba(11,132,200,.15);
+      border-radius: 16px; padding: 28px;
+      position: relative; overflow: hidden;
+    }
+    .phases-viz::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #0B84C8, #5DC0FF, #06C8E8);
+    }
+    .phases-title { font-family: var(--fm); font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--tx3); margin-bottom: 24px; }
+    .phase-item {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+    }
+    .phase-item:last-child { margin-bottom: 0; }
+    .phase-num {
+      font-family: var(--fm); font-size: 10px; color: var(--ac3);
+      background: rgba(11,132,200,.12); border: 1px solid rgba(11,132,200,.2);
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .phase-bar-wrap { flex: 1; }
+    .phase-label { font-size: 11px; color: var(--tx2); margin-bottom: 5px; font-weight: 600; }
+    .phase-bar { height: 4px; background: rgba(11,132,200,.1); border-radius: 2px; overflow: hidden; }
+    .phase-fill { height: 100%; border-radius: 2px; }
+    .fill-ac  { background: linear-gradient(90deg, #0B84C8, #5DC0FF); width: 75%; animation: grow 2s 1s ease both; }
+    .fill-grn { background: linear-gradient(90deg, #0FA872, #30D890); width: 55%; animation: grow 2s 1.3s ease both; }
+    .fill-red { background: linear-gradient(90deg, #E83055, #FF6080); width: 35%; animation: grow 2s 1.6s ease both; }
+    @keyframes grow { from{width:0} }
+    .phase-pct { font-family: var(--fm); font-size: 10px; color: var(--tx3); width: 30px; text-align: right; }
+
+    /* ── APIs ── */
+    .apis { padding: 100px 0; }
+    .api-table-wrap {
+      background: var(--bg2); border: 1px solid rgba(11,132,200,.12); border-radius: 16px;
+      overflow: hidden; margin-top: 48px;
+    }
+    .api-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .api-table th {
+      background: rgba(11,132,200,.08);
+      font-family: var(--fm); font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--tx3); padding: 12px 20px; text-align: left;
+      border-bottom: 1px solid rgba(11,132,200,.1);
+    }
+    .api-table td { padding: 14px 20px; font-size: 12.5px; border-bottom: 1px solid rgba(11,132,200,.06); color: var(--tx2); vertical-align: middle; }
+    .api-table tr:last-child td { border-bottom: none; }
+    .api-table tr:hover td { background: rgba(11,132,200,.04); }
+    .api-method { font-family: var(--fm); font-size: 10px; color: var(--grn); background: rgba(15,168,114,.1); padding: 3px 7px; border-radius: 4px; }
+    .api-method.post { color: var(--amb); background: rgba(232,144,16,.1); }
+    .api-path { font-family: var(--fm); font-size: 11px; color: var(--ac3); }
+    .api-status-ok { color: var(--grn); font-size: 16px; }
+    .api-status-no { color: var(--red); font-size: 16px; }
+
+    /* ── STORAGE ── */
+    .storage { padding: 100px 0; background: var(--bg2); }
+    .storage-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 48px; }
+    .storage-card {
+      background: var(--bg); border: 1px solid rgba(11,132,200,.1); border-radius: 12px;
+      padding: 18px 16px;
+    }
+    .sk-key { font-family: var(--fm); font-size: 9px; color: var(--ac3); margin-bottom: 6px; word-break: break-all; }
+    .sk-desc { font-size: 11.5px; color: var(--tx2); line-height: 1.5; }
+
+    /* ── INSTALL ── */
+    .install { padding: 100px 0; }
+    .install-steps { display: grid; grid-template-columns: repeat(5,1fr); gap: 0; margin-top: 56px; position: relative; }
+    .install-steps::before {
+      content: ''; position: absolute;
+      top: 32px; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(11,132,200,.3), transparent);
+      z-index: 0;
+    }
+    .ins-step { text-align: center; position: relative; z-index: 1; padding: 0 10px; }
+    .ins-num {
+      width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 18px;
+      background: var(--bg2); border: 2px solid rgba(11,132,200,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--fd); font-size: 28px; color: var(--ac3);
+      letter-spacing: 1px;
+    }
+    .ins-title { font-family: var(--fm); font-size: 10px; font-weight: 700; color: var(--tx1); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+    .ins-desc { font-size: 12px; color: var(--tx2); line-height: 1.5; }
+    .ins-code { font-family: var(--fm); font-size: 10px; color: var(--ac3); background: rgba(11,132,200,.08); padding: 4px 8px; border-radius: 5px; margin-top: 6px; display: inline-block; }
+
+    /* ── RATE LIMITS ── */
+    .ratelimits { padding: 100px 0; background: var(--bg2); }
+    .rl-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 48px; }
+    .rl-card {
+      background: var(--bg); border: 1px solid rgba(11,132,200,.1); border-radius: 14px;
+      padding: 24px 20px; text-align: center;
+    }
+    .rl-val { font-family: var(--fd); font-size: 40px; color: var(--ac3); letter-spacing: 2px; line-height: 1; margin-bottom: 8px; }
+    .rl-unit { font-family: var(--fm); font-size: 9px; color: var(--tx3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+    .rl-desc { font-size: 12px; color: var(--tx2); line-height: 1.4; }
+    .rl-badge { display: inline-block; font-family: var(--fm); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-top: 10px; background: rgba(11,132,200,.1); color: var(--ac3); }
+
+    /* ── PRO CTA ── */
+    .pro-cta {
+      padding: 100px 0;
+      text-align: center;
+    }
+    .pro-card {
+      background: linear-gradient(135deg, rgba(11,132,200,.08) 0%, rgba(6,200,232,.05) 100%);
+      border: 1px solid rgba(11,132,200,.2);
+      border-radius: 24px; padding: 64px 48px;
+      position: relative; overflow: hidden;
+    }
+    .pro-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #0B84C8, #5DC0FF, #06C8E8);
+    }
+    .pro-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(212,160,23,.12); border: 1px solid rgba(212,160,23,.3);
+      color: var(--gold); border-radius: 100px; padding: 6px 16px;
+      font-family: var(--fm); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .pro-price {
+      font-family: var(--fd); font-size: 80px; letter-spacing: 4px; color: var(--tx1); line-height: 1;
+      margin-bottom: 6px;
+    }
+    .pro-price sup { font-size: 40px; vertical-align: top; margin-top: 10px; color: var(--ac3); }
+    .pro-period { font-family: var(--fm); font-size: 11px; color: var(--tx3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 36px; }
+    .pro-features { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+    .pro-feat { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--tx2); }
+    .pro-feat::before { content: '✦'; color: var(--gold); font-size: 10px; }
+    .btn-pro {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--gold), #E8B820);
+      color: #020610; text-decoration: none;
+      padding: 18px 48px; border-radius: 12px;
+      font-size: 15px; font-weight: 900; letter-spacing: 1px;
+      box-shadow: 0 8px 36px rgba(212,160,23,.4);
+      transition: all .25s;
+    }
+    .btn-pro:hover { transform: translateY(-2px); box-shadow: 0 12px 48px rgba(212,160,23,.6); }
+    .pro-note { font-size: 12px; color: var(--tx3); margin-top: 16px; font-family: var(--fm); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      background: var(--bg);
+      border-top: 1px solid rgba(11,132,200,.1);
+      padding: 48px 40px 32px;
+    }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 32px; }
+    .footer-brand { font-family: var(--fd); font-size: 36px; letter-spacing: 4px; background: linear-gradient(135deg,#5DC0FF,#1EA0E8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .footer-tagline { font-size: 13px; color: var(--tx3); margin-top: 6px; font-family: var(--fm); }
+    .footer-links { display: flex; flex-direction: column; gap: 8px; }
+    .footer-links-title { font-family: var(--fm); font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--tx3); margin-bottom: 6px; }
+    .footer-links a { font-size: 13px; color: var(--tx2); text-decoration: none; transition: color .2s; }
+    .footer-links a:hover { color: var(--ac3); }
+    .footer-bottom { max-width: 1100px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(11,132,200,.07); display: flex; justify-content: space-between; align-items: center; }
+    .footer-copy { font-family: var(--fm); font-size: 10px; color: var(--tx3); }
+    .footer-version { font-family: var(--fm); font-size: 10px; color: var(--tx3); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .how-inner { grid-template-columns: 1fr; gap: 40px; }
+      .install-steps { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .install-steps::before { display: none; }
+      .storage-grid { grid-template-columns: 1fr 1fr; }
+      .rl-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .container { padding: 0 20px; }
+      .hero-stats-row { gap: 24px; }
+      .pro-card { padding: 40px 24px; }
+      .storage-grid { grid-template-columns: 1fr; }
+      .rl-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <img src="logo.png" alt="SAYN" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#0B84C8,#06C8E8)'">
+    </div>
+    <span class="nav-brand">SAYN</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#features">Xüsusiyyətlər</a></li>
+    <li><a href="#how">Necə işləyir</a></li>
+    <li><a href="#apis">API-lar</a></li>
+    <li><a href="#install">Quraşdırma</a></li>
+    <li><a href="#pro" class="nav-cta">PRO — $2.99/ay</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Chrome Extension v2.3 — Aktiv
+  </div>
+
+  <h1 class="hero-title">SAYN</h1>
+  <div class="hero-subtitle-line">Instagram Follower Analyzer</div>
+
+  <p class="hero-desc">
+    <strong>Instagram hesabınız haqqında dərin analitika.</strong> Real vaxt rejimində
+    kim sizi izləmir, kim blok edib, story-ni kimdən gizlədib — hamısını bilin.
+    Heç bir üçüncü tərəf server yoxdur.
+  </p>
+
+  <div class="hero-btns">
+    <a href="#install" class="btn-hero-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Pulsuz Yüklə
+    </a>
+    <a href="#features" class="btn-hero-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/>
+      </svg>
+      Daha Ətraflı
+    </a>
+  </div>
+
+  <div class="hero-stats-row">
+    <div class="hero-stat">
+      <span class="hero-stat-n">5000+</span>
+      <div class="hero-stat-l">Kod sətri</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-n">20+</span>
+      <div class="hero-stat-l">Analitika</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-n">0</span>
+      <div class="hero-stat-l">Server Yoxdur</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-n">MV3</span>
+      <div class="hero-stat-l">Manifest V3</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXTENSION PREVIEW -->
+<div class="extension-preview">
+  <div class="ext-frame">
+    <div class="ext-inner">
+      <div class="ext-hdr">
+        <div class="ext-logo">
+          <img src="logo.png" alt="SAYN" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#0B84C8,#06C8E8)'">
+        </div>
+        <div>
+          <div class="ext-brand">SAYN</div>
+          <span class="ext-sub">Follower Analyzer v2.3</span>
+        </div>
+      </div>
+      <div class="ext-status">
+        <div class="ext-status-lbl">Status</div>
+        <div class="ext-status-val">
+          <span class="ext-dot"></span>
+          Son skan: Mar 17, 14:32
+        </div>
+      </div>
+      <div class="ext-stats-grid">
+        <div class="ext-stat-box"><div class="ext-stat-n">847</div><div class="ext-stat-l">Following</div></div>
+        <div class="ext-stat-box"><div class="ext-stat-n" style="color:#E83055">312</div><div class="ext-stat-l">Not Back</div></div>
+        <div class="ext-stat-box"><div class="ext-stat-n" style="color:#0FA872">591</div><div class="ext-stat-l">Followers</div></div>
+        <div class="ext-stat-box"><div class="ext-stat-n" style="color:#E83055">14</div><div class="ext-stat-l">Blocked</div></div>
+        <div class="ext-stat-box"><div class="ext-stat-n" style="color:#A060FF">7</div><div class="ext-stat-l">Story Hid.</div></div>
+      </div>
+      <button class="ext-btn-main">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+        Instagram-da Analiz Et
+      </button>
+      <div class="ext-qa-grid">
+        <div class="ext-qa qa-red">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 18l-3-3 3-3"/><path d="M20 15h-6"/></svg>
+          Not Following Back
+        </div>
+        <div class="ext-qa qa-grn">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          New Followers
+        </div>
+        <div class="ext-qa qa-amb">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Lost Followers
+        </div>
+        <div class="ext-qa qa-red">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          All Blocked
+        </div>
+        <div class="ext-qa qa-pur">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          Story Hidden
+        </div>
+        <div class="ext-qa qa-gold">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Top Fans
+        </div>
+      </div>
+      <div class="ext-footer">
+        <span>v2.3.0</span>
+        <span style="color:rgba(11,132,200,.5)">SAYN Reports</span>
+        <span>instagram.com</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="section-tag">Xüsusiyyətlər</div>
+      <h2 class="section-title">Hər Şeyi <span>Görün</span></h2>
+      <p class="section-desc">Instagram-ın daxili API-larından real vaxt məlumatları. Heç bir üçüncü tərəf server yoxdur — bütün məlumatlar birbaşa brauzerinizdə işlənir.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-card feat-red">
+        <div class="feat-icon feat-icon-red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 18l-3-3 3-3"/><path d="M20 15h-6"/></svg>
+        </div>
+        <div class="feat-name">Not Following Back</div>
+        <div class="feat-desc">Sizi izləməyən, amma siz izlədiklərinizi dərhal görün. <code style="font-family:var(--fm);font-size:11px;color:var(--ac3)">follows_viewer === false</code> sahəsindən götürülür.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+      <div class="feature-card feat-grn">
+        <div class="feat-icon feat-icon-grn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        </div>
+        <div class="feat-name">Yeni & İtirilmiş İzləyicilər</div>
+        <div class="feat-desc">Skan tarixçəsi müqayisəsi ilə kim yeni izlədi, kim izləməyi dayandırdı — dəqiq tarixlə.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+      <div class="feature-card feat-red">
+        <div class="feat-icon feat-icon-red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </div>
+        <div class="feat-name">Bütün Bloklananlar</div>
+        <div class="feat-desc">Tam blok siyahısı — <code style="font-family:var(--fm);font-size:11px;color:var(--ac3)">/api/v1/users/blocked_list/</code> API-dan birbaşa. DOM fallback ilə.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+      <div class="feature-card feat-pur">
+        <div class="feat-icon feat-icon-pur">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </div>
+        <div class="feat-name">Story Gizlədilənlər</div>
+        <div class="feat-desc">Story-nizi kimdən gizlətdiyinizi görün. <code style="font-family:var(--fm);font-size:11px;color:#A060FF">hide_story_from</code> API + DOM scraping fallback.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+      <div class="feature-card feat-gold">
+        <div class="feat-icon feat-icon-gold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="feat-name">Top Fans</div>
+        <div class="feat-desc">Post şərhlərindən ən çox aktivlik göstərənlər. Ghost izləyicilər (heç vaxt şərh etməyənlər) ayrıca müəyyən edilir.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+      <div class="feature-card feat-ac">
+        <div class="feat-icon feat-icon-ac">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        </div>
+        <div class="feat-name">Hesab Statistikası</div>
+        <div class="feat-desc">Mutual izləyicilər, inaktiv hesablar (0 post), story baxanlar, post statistikası — hamısı canlı.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+      <div class="feature-card feat-amb">
+        <div class="feat-icon feat-icon-amb">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="feat-name">Profil Baxanlar (PRO)</div>
+        <div class="feat-desc">Profilinizə baxanlar, gizli pərəstişkarlar, silinmiş bəyənmələr — proqnoz əsaslı simulyasiya.</div>
+        <span class="feat-badge badge-pro">PRO</span>
+      </div>
+
+      <div class="feature-card feat-grn">
+        <div class="feat-icon feat-icon-grn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+        <div class="feat-name">Unfollow & CSV Export</div>
+        <div class="feat-desc">Birbaşa extensiondən unfollow edin. Bütün məlumatları CSV formatında endirin. Whitelist dəstəyi.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+      <div class="feature-card feat-ac">
+        <div class="feat-icon feat-icon-ac">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="feat-name">Məxfilik</div>
+        <div class="feat-desc">Sıfır server. Bütün məlumatlar yalnız brauzerinizdə saxlanır (<code style="font-family:var(--fm);font-size:11px;color:var(--ac3)">localStorage</code>). Heç bir məlumat toplanmır.</div>
+        <span class="feat-badge badge-free">Pulsuz</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="how-inner">
+      <div>
+        <div class="section-tag">Texniki Arxitektura</div>
+        <h2 class="section-title">Necə <span>İşləyir</span></h2>
+        <p class="section-desc" style="margin-bottom:40px">3 mərhələli skan prosesi Instagram-ın öz API-larından real vaxt məlumatları toplayır.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-line"></div>
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Mərhələ 1 — Following Siyahısı</div>
+              <div class="step-desc">GraphQL query ilə bütün izlədikləriniz yüklənir. Hər 5 sorğudan sonra avtomatik fasilə verilir.</div>
+              <span class="step-code">GET /graphql/query/?query_hash=3dec7e2c...</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-line"></div>
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Mərhələ 2 — Followers Siyahısı</div>
+              <div class="step-desc">Sizi izləyənlər ayrıca yüklənir, sonra müqayisə edilir.</div>
+              <span class="step-code">GET /api/v1/friendships/&lt;uid&gt;/followers/</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-line"></div>
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Mərhələ 3 — Blok Siyahısı</div>
+              <div class="step-desc">Blok edilmiş hesablar toplanır. API uğursuz olarsa DOM scraping aktivləşir.</div>
+              <span class="step-code">GET /api/v1/users/blocked_list/</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">✓</div>
+            <div class="step-content">
+              <div class="step-title">Skan Tamamlandı</div>
+              <div class="step-desc">Nəticələr localStorage-ə yazılır, əvvəlki skan ilə müqayisə edilir, dəyişikliklər göstərilir.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phases-viz">
+        <div class="phases-title">Skan Prosesi — Real Vaxt</div>
+        <div class="phase-item">
+          <div class="phase-num">1</div>
+          <div class="phase-bar-wrap">
+            <div class="phase-label">Following Fetch</div>
+            <div class="phase-bar"><div class="phase-fill fill-ac"></div></div>
+          </div>
+          <div class="phase-pct">75%</div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-num">2</div>
+          <div class="phase-bar-wrap">
+            <div class="phase-label">Followers Fetch</div>
+            <div class="phase-bar"><div class="phase-fill fill-grn"></div></div>
+          </div>
+          <div class="phase-pct">55%</div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-num">3</div>
+          <div class="phase-bar-wrap">
+            <div class="phase-label">Blocked List</div>
+            <div class="phase-bar"><div class="phase-fill fill-red"></div></div>
+          </div>
+          <div class="phase-pct">35%</div>
+        </div>
+
+        <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(11,132,200,.1)">
+          <div class="phases-title" style="margin-bottom:16px">Fetch Interceptor</div>
+          <div style="font-size:11.5px;color:var(--tx2);line-height:1.7">
+            <code style="font-family:var(--fm);color:var(--ac3);font-size:10px">window.fetch</code> override ilə Instagram-ın öz sorğularını passiv şəkildə dinləyir. Əlavə sorğu göndərilmir — məlumatlar Instagram yüklədikcə avtomatik toplanır.
+          </div>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+            <div style="font-family:var(--fm);font-size:10px;color:var(--tx3);display:flex;gap:8px;align-items:center">
+              <span style="color:var(--grn)">→</span> /blocked_list/ — blok siyahısı
+            </div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--tx3);display:flex;gap:8px;align-items:center">
+              <span style="color:var(--grn)">→</span> hide_story — gizlədilmişlər
+            </div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--tx3);display:flex;gap:8px;align-items:center">
+              <span style="color:var(--grn)">→</span> /comments/ — top fans üçün
+            </div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--tx3);display:flex;gap:8px;align-items:center">
+              <span style="color:var(--grn)">→</span> web_profile_info — inaktiv hesablar
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APIs -->
+<section class="apis" id="apis">
+  <div class="container">
+    <div class="section-tag">Instagram API-ları</div>
+    <h2 class="section-title">İstifadə Edilən <span>API-lar</span></h2>
+    <p class="section-desc">Bütün sorğular <code style="font-family:var(--fm);color:var(--ac3);font-size:14px">credentials: 'include'</code> ilə Instagram session cookie-sini istifadə edir.</p>
+
+    <div class="api-table-wrap">
+      <table class="api-table">
+        <thead>
+          <tr>
+            <th>Metod</th>
+            <th>Endpoint</th>
+            <th>Məqsəd</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/graphql/query/?query_hash=3dec7e2c...</td>
+            <td>Following siyahısı (pagination)</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/friendships/&lt;uid&gt;/followers/</td>
+            <td>Followers siyahısı</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/users/blocked_list/</td>
+            <td>Tam blok siyahısı</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/friendships/hide_story_from/</td>
+            <td>Story gizlədilənlər</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/feed/reels_media/?reel_ids=&lt;uid&gt;</td>
+            <td>Aktiv story-lər</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/media/&lt;pk&gt;/list_reel_media_viewer/</td>
+            <td>Story baxanlar</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/feed/user/&lt;uid&gt;/?count=12</td>
+            <td>Post siyahısı</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/media/&lt;id&gt;/comments/</td>
+            <td>Post şərhləri (Top Fans)</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method post">POST</span></td>
+            <td class="api-path">/web/friendships/&lt;user_id&gt;/unfollow/</td>
+            <td>İzləməyi dayandır</td>
+            <td class="api-status-ok">✓</td>
+          </tr>
+          <tr>
+            <td><span class="api-method">GET</span></td>
+            <td class="api-path">/api/v1/media/&lt;id&gt;/likers/</td>
+            <td>Post bəyənənlər</td>
+            <td class="api-status-no">✗ 403</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- STORAGE KEYS -->
+<section class="storage">
+  <div class="container">
+    <div class="section-tag">Məlumat Saxlama</div>
+    <h2 class="section-title">localStorage <span>Açarları</span></h2>
+    <p class="section-desc">Bütün məlumatlar yalnız öz brauzerinizdə saxlanır. Heç bir server yoxdur.</p>
+
+    <div class="storage-grid">
+      <div class="storage-card">
+        <div class="sk-key">sayn_history_v1</div>
+        <div class="sk-desc">Son 10 skan snapshotı. Yeni/itirilmiş izləyicilər müqayisəsi üçün.</div>
+      </div>
+      <div class="storage-card">
+        <div class="sk-key">sayn_blocked_all_v1</div>
+        <div class="sk-desc">Tam blok siyahısı cache-i. API-dan alınan bütün bloklananlar.</div>
+      </div>
+      <div class="storage-card">
+        <div class="sk-key">sayn_hidden_story_v1</div>
+        <div class="sk-desc">Story gizlədilmiş istifadəçilər cache-i.</div>
+      </div>
+      <div class="storage-card">
+        <div class="sk-key">sayn_wl_v3</div>
+        <div class="sk-desc">Whitelist — unfollow edilməyəcək istifadəçilər [{id, username}].</div>
+      </div>
+      <div class="storage-card">
+        <div class="sk-key">sayn_notes_v2</div>
+        <div class="sk-desc">İstifadəçi qeydləri {userId: "mətn"} formatında.</div>
+      </div>
+      <div class="storage-card">
+        <div class="sk-key">sayn_likers_v1</div>
+        <div class="sk-desc">Post şərh edənlər cache-i {postId: users[]} — Top Fans üçün.</div>
+      </div>
+      <div class="storage-card">
+        <div class="sk-key">sayn_cfg_v3</div>
+        <div class="sk-desc">Konfiqurasiya parametrləri — skan gecikmələri, fasilələr.</div>
+      </div>
+      <div class="storage-card">
+        <div class="sk-key">sayn_pro_v1</div>
+        <div class="sk-desc">PRO statusu (boolean) + sayn_license_v1 lisenziya açarı.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section class="install" id="install">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:56px">
+      <div class="section-tag">Quraşdırma</div>
+      <h2 class="section-title">5 Addımda <span>Başlayın</span></h2>
+      <p class="section-desc" style="margin:0 auto">Developer mode ilə heç bir mağaza lazım deyil.</p>
+    </div>
+
+    <div class="install-steps">
+      <div class="ins-step">
+        <div class="ins-num">1</div>
+        <div class="ins-title">Yüklə</div>
+        <div class="ins-desc">Extension fayllarını ZIP şəklində yüklə və çıxar.</div>
+      </div>
+      <div class="ins-step">
+        <div class="ins-num">2</div>
+        <div class="ins-title">Extensions Aç</div>
+        <div class="ins-desc">Chrome ünvan çubuğuna daxil ol:</div>
+        <span class="ins-code">chrome://extensions/</span>
+      </div>
+      <div class="ins-step">
+        <div class="ins-num">3</div>
+        <div class="ins-title">Developer Mode</div>
+        <div class="ins-desc">Sağ yuxarı küncdəki "Developer mode" keçidini aktiv et.</div>
+      </div>
+      <div class="ins-step">
+        <div class="ins-num">4</div>
+        <div class="ins-title">Unpacked Yüklə</div>
+        <div class="ins-desc">"Load unpacked" düyməsinə basıb çıxarılmış qovluğu seç.</div>
+      </div>
+      <div class="ins-step">
+        <div class="ins-num">5</div>
+        <div class="ins-title">İstifadə Et</div>
+        <div class="ins-desc">Instagram.com-a get, toolbar-dakı SAYN ikonuna bas.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:56px;background:var(--bg2);border:1px solid rgba(11,132,200,.15);border-radius:16px;padding:28px 32px;display:flex;align-items:flex-start;gap:20px">
+      <div style="width:40px;height:40px;border-radius:10px;background:rgba(232,144,16,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E89010" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:700;color:var(--amb);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Vacib Qeyd</div>
+        <div style="font-size:13.5px;color:var(--tx2);line-height:1.6">SAYN yalnız <strong style="color:var(--tx1)">instagram.com</strong> səhifəsindən istifadə edilə bilər. Extension başqa səhifədəki ikonuna basılsa avtomatik instagram.com açır. Rate limiting parametrləri Ayarlar bölməsindən konfiqurasiya edilə bilər.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RATE LIMITS -->
+<section class="ratelimits">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px">
+      <div class="section-tag">Rate Limiting</div>
+      <h2 class="section-title">Təhlükəsiz <span>Skan</span></h2>
+      <p class="section-desc" style="margin:0 auto">Instagram hesabınızı qorumaq üçün avtomatik gecikmələr tətbiq edilir.</p>
+    </div>
+    <div class="rl-grid">
+      <div class="rl-card">
+        <div class="rl-val">1000</div>
+        <span class="rl-unit">ms</span>
+        <div class="rl-desc">Sorğular arasında minimum gecikm</div>
+        <span class="rl-badge">Konfiqurasiya edilə bilər</span>
+      </div>
+      <div class="rl-card">
+        <div class="rl-val">10s</div>
+        <span class="rl-unit">fasilə</span>
+        <div class="rl-desc">Hər 5 sorğudan sonra avtomatik fasilə</div>
+        <span class="rl-badge">Konfiqurasiya edilə bilər</span>
+      </div>
+      <div class="rl-card">
+        <div class="rl-val">4.5s</div>
+        <span class="rl-unit">unfollow arası</span>
+        <div class="rl-desc">İzləməni dayandırmalar arasında gecikm</div>
+        <span class="rl-badge">Konfiqurasiya edilə bilər</span>
+      </div>
+      <div class="rl-card">
+        <div class="rl-val">5min</div>
+        <span class="rl-unit">unfollow fasiləsi</span>
+        <div class="rl-desc">Hər 5 unfollow-dan sonra uzun fasilə</div>
+        <span class="rl-badge">Konfiqurasiya edilə bilər</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRO CTA -->
+<section class="pro-cta" id="pro">
+  <div class="container">
+    <div class="pro-card">
+      <div class="pro-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        PRO Plan
+      </div>
+      <div class="pro-price"><sup>$</sup>2.99</div>
+      <div class="pro-period">/ aylıq · Lemon Squeezy</div>
+      <div class="pro-features">
+        <div class="pro-feat">Profil Baxanlar</div>
+        <div class="pro-feat">Gizli Pərəstişkarlar</div>
+        <div class="pro-feat">Best Followers Top 20</div>
+        <div class="pro-feat">Active Story Viewers</div>
+        <div class="pro-feat">Silinmiş Bəyənmələr</div>
+        <div class="pro-feat">Lost Interest Analizi</div>
+      </div>
+      <a href="#" class="btn-pro">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        PRO-ya Keçin
+      </a>
+      <div class="pro-note">Lisenziya açarı formatı: SAYN-XXXX-XXXX-XXXX · İstənilən vaxt ləğv edilə bilər</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SAYN</div>
+      <div class="footer-tagline">Instagram Follower Analyzer v2.3</div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-links-title">Keçidlər</div>
+      <a href="#features">Xüsusiyyətlər</a>
+      <a href="#how">Arxitektura</a>
+      <a href="#apis">API Sənədləşməsi</a>
+      <a href="#install">Quraşdırma</a>
+    </div>
+    <div class="footer-links">
+      <div class="footer-links-title">Texniki</div>
+      <a href="#">Manifest V3</a>
+      <a href="#">background.js</a>
+      <a href="#">sayn-reports.js</a>
+      <a href="#">popup.html</a>
+    </div>
+    <div class="footer-links">
+      <div class="footer-links-title">PRO</div>
+      <a href="#pro">PRO Planı</a>
+      <a href="https://lemonsqueezy.com" target="_blank">Lemon Squeezy</a>
+      <a href="#">Lisenziya</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 SAYN — Instagram Follower Analyzer. Bütün hüquqlar qorunur.</span>
+    <span class="footer-version">v2.3.0 · Manifest V3 · Chrome Extension</span>
+  </div>
+</footer>
+
+<script>
+  // Smooth reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .ins-step, .rl-card, .storage-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity .5s ease, transform .5s ease';
+    observer.observe(el);
+  });
+
+  // Nav active state
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--ac3)' : '';
+    });
+  });
+</script>
+</body>
+</html>
